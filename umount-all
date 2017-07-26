@@ -1,0 +1,12 @@
+#!/bin/sh
+# Spaces in mount points
+# Unstable, there are errors (возможно, дело в /run в wheezy'е; mount-all [полный] из squeeze в wheezy)
+# Есть и другие ошибки
+
+set -e
+
+[ $# != 1 ] && echo "Usage: ${0##*/} MOUNT_POINT" >&2 && exit 1
+
+for POINT in $(cut -d ' ' -f 2 /proc/mounts | grep "^$(readlink -f "$1")/" | sort -r); do
+	umount -l "$POINT"
+done

@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+# TODO: если из squeeze смонтировать wheezy, то внутренний aptitude будет ругаться
+
+[ $# != 1 ] && echo "Usage: ${0##*/} MOUNT_POINT" >&2 && exit 1
+
+mountpoint "$1/dev" > /dev/null || mount -t tmpfs    none     "$1/dev"
+cp -pr /dev "$1" # Если не сделать -p, то получим crw-r--r-- /dev/null
+rm -rf "$1"/dev/pts/*
+
+mountpoint "$1/dev/pts" > /dev/null || mount -t devpts   none     "$1/dev/pts"
+mountpoint "$1/proc" > /dev/null || mount -t proc     none     "$1/proc"
+mountpoint "$1/sys" > /dev/null || mount -t sysfs    none     "$1/sys"
+
+if [ -d "$1/run" ]; then
+	mountpoint "$1/run" > /dev/null || mount -t tmpfs    none     "$1/run"
+	mkdir "$1/run/lock"
+fi
